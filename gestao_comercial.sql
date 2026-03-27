@@ -96,10 +96,3 @@ CREATE TABLE Promocoes (
     data_inicio DATETIME,
     data_fim DATETIME
 );
-CREATE TABLE Promocoes_Produtos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    promocao_id INT,
-    produto_id INT,
-    FOREIGN KEY (promocao_id) REFERENCES Promocoes(id),
-    FOREIGN KEY (produto_id) REFERENCES Produtos(id)
-);
