@@ -24,6 +24,7 @@ CREATE TABLE Produtos (
     preco DECIMAL(10, 2) NOT NULL,
     categoria_id INT,
     fornecedor_id INT,
+    estoque INT NOT NULL,
     FOREIGN KEY (categoria_id) REFERENCES Categorias(id),
     FOREIGN KEY (fornecedor_id) REFERENCES Fornecedores(id)
 );
