@@ -1,25 +1,28 @@
 DELIMITER $$
-CREATE PROCEDURE REALIZAR_VENDA (
+CREATE PROCEDURE EXEC_VENDA (
 IN p_cliente_id INT,
 IN p_produto_id INT,
-IN p_quantidade INT,
+IN p_quantidade INT
 )
 BEGIN
-DECLARE V_ESTOQUE INT;
-DECLARE V_VENDA_ID INT;
-DECLARE V_PRECO_UNITARIO DECIMAL(10, 2);
+DECLARE v_estoque INT;
+DECLARE v_preco DECIMAL(12,2);
+DECLARE v_venda_id INT;
 START TRANSACTION;
-SELECT estoque INTO V_ESTOQUE FROM Produtos WHERE id = p_produto_id;
-IF V_ESTOQUE >= p_quantidade THEN
-SELECT preco INTO V_PRECO_UNITARIO
-INSERT INTO VENDAS SET V_VENDA_ID = LAST_INSERT_ID();
-INSERT INTO VENDAS_ITENS(VENDA_ID, PRODUTO_ID, QUANTIDADE, PRECO_UNITARIO)
-VALUES (V_VENDA_ID, p_produto_id, p_quantidade, V_PRECO_UNITARIO);
+SELECT estoque INTO v_estoque
+FROM Produtos
+WHERE id = p_produto_id;
+IF v_estoque >= p_quantidade THEN
+SELECT preco INTO v_preco
+FROM Produtos
+WHERE id = p_produto_id;
+INSERT INTO Vendas (cliente_id,total) VALUES (p_cliente_id,v_preco * p_quantidade);
+SET v_venda_id = LAST_INSERT_ID();
+INSERT INTO Vendas_Itens (venda_id,produto_id,quantidade,preco_unitario) VALUES (v_venda_id,p_produto_id,p_quantidade,v_preco);
 COMMIT;
 ELSE
+SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Estoque insuficiente para realizar a venda. Realizado o ROLLBACK.';
 ROLLBACK;
-END IF;
+END IF; 
 END$$
-
 DELIMITER ;
-    
