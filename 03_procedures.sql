@@ -19,6 +19,7 @@ WHERE id = p_produto_id;
 INSERT INTO Vendas (cliente_id,total) VALUES (p_cliente_id,v_preco * p_quantidade);
 SET v_venda_id = LAST_INSERT_ID();
 INSERT INTO Vendas_Itens (venda_id,produto_id,quantidade,preco_unitario) VALUES (v_venda_id,p_produto_id,p_quantidade,v_preco);
+INSERT INTO pagamentos (venda_id,valor) VALUES (v_venda_id,v_preco * p_quantidade);
 COMMIT;
 ELSE
 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Estoque insuficiente para realizar a venda. Realizado o ROLLBACK.';
