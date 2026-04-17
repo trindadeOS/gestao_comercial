@@ -22,7 +22,7 @@ INSERT INTO Vendas_Itens (venda_id,produto_id,quantidade,preco_unitario) VALUES 
 INSERT INTO pagamentos (venda_id,valor) VALUES (v_venda_id,v_preco * p_quantidade);
 COMMIT;
 ELSE
-SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Estoque insuficiente para realizar a venda. Realizado o ROLLBACK.';
+SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Estoque insuficiente para realizar a venda.';
 ROLLBACK;
 END IF; 
 END$$
