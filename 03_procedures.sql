@@ -10,6 +10,7 @@ DECLARE v_estoque INT;
 DECLARE v_preco DECIMAL(12,2);
 DECLARE v_venda_id INT;
 START TRANSACTION;
+SET @usuario_id = p_usuario_id;
 SELECT estoque INTO v_estoque
 FROM Produtos
 WHERE id = p_produto_id;
@@ -21,7 +22,6 @@ INSERT INTO Vendas (cliente_id,total) VALUES (p_cliente_id,v_preco * p_quantidad
 SET v_venda_id = LAST_INSERT_ID();
 INSERT INTO Vendas_Itens (venda_id,produto_id,quantidade,preco_unitario) VALUES (v_venda_id,p_produto_id,p_quantidade,v_preco);
 INSERT INTO pagamentos (venda_id,valor) VALUES (v_venda_id,v_preco * p_quantidade);
-SET @usuario_id = p_usuario_id;
 INSERT INTO Auditoria (usuario_id,tabela_afetada,id_registro,tipo_operacao,valor_antigo,valor_novo) VALUES (p_usuario_id,'Vendas',v_venda_id,'INSERT',NULL,NULL);
 COMMIT;
 ELSE
