@@ -68,10 +68,15 @@ CREATE TABLE Usuarios (
 );
 CREATE TABLE Auditoria (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT,
-    acao VARCHAR(255) NOT NULL,
+    usuario_id INT NOT NULL,
+    tabela_afetada VARCHAR(255) NOT NULL,
+    id_registro INT,
+    tipo_operacao ENUM ('INSERT', 'UPDATE', 'DELETE') NOT NULL,
+    valor_antigo text,
+    valor_novo text,
     data_acao DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES Usuarios(id)
+    
 );
 CREATE TABLE Devolucoes (
     id INT AUTO_INCREMENT PRIMARY KEY,
