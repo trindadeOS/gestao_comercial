@@ -25,6 +25,7 @@ CREATE TABLE Produtos (
     categoria_id INT,
     fornecedor_id INT,
     estoque INT NOT NULL,
+    estoque_minimo INT DEFAULT 5,
     FOREIGN KEY (categoria_id) REFERENCES Categorias(id),
     FOREIGN KEY (fornecedor_id) REFERENCES Fornecedores(id)
 );
@@ -39,6 +40,7 @@ CREATE TABLE Estoque_Movimentacoes (
 CREATE TABLE Vendas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     cliente_id INT,
+    status ENUM('Ativa','Cancelada') default 'Ativa',
     data_venda DATETIME DEFAULT CURRENT_TIMESTAMP,
     total DECIMAL(10, 2) NOT NULL,
     FOREIGN KEY (cliente_id) REFERENCES clientes(id)
@@ -102,3 +104,16 @@ CREATE TABLE Promocoes (
     data_inicio DATETIME,
     data_fim DATETIME
 );
+
+-- views RELATORIOS
+
+CREATE VIEW relatorio_reposicao AS
+SELECT 
+    id,
+    nome,
+    estoque,
+    estoque_minimo,
+    (estoque_minimo - estoque) AS Faltam
+FROM Produtos
+WHERE estoque < estoque_minimo;
+
