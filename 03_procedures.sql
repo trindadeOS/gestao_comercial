@@ -60,3 +60,42 @@ END IF;
 END$$
 
 DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE CANCELAR_VENDA (
+IN p_cliente_id INT,
+IN p_venda_id INT,
+IN p_usuario_id INT
+)
+BEGIN
+DECLARE v_cliente_id INT;
+DECLARE v_venda_id INT;
+DECLARE v_usuario_id INT;
+DECLARE v_status VARCHAR (20);
+DECLARE v_quantidade INT;
+-- Verificar se o id da venda existe
+START TRANSACTION;
+SELECT id
+INTO v_venda_id
+FROM vendas
+WHERE id = p_venda_id;
+-- verificar se o status não é Cancelada
+SELECT status
+INTO v_status
+FROM Vendas
+WHERE id = p_venda_id;
+IF v_status = 'Ativa' THEN
+UPDATE vendas SET status = 'Cancelada' WHERE id = p_venda_id;
+UPDATE Produtos JOIN Vendas_Itens ON Produtos.id = Vendas_Itens.produto_id SET estoque = estoque + Vendas_Itens.quantidade WHERE Vendas_Itens.venda_id = p_venda_id;
+INSERT INTO Auditoria (usuario_id,tabela_afetada,id_registro,tipo_operacao,valor_antigo,valor_novo) VALUES (p_usuario_id,'Vendas',p_venda_id,'UPDATE', NULL, NULL);
+COMMIT;
+ELSE
+ROLLBACK;
+SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Não foi possivel realizar o cancelamento.';
+END IF;
+END$$
+
+DELIMITER ;
+
+
