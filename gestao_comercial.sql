@@ -40,9 +40,9 @@ CREATE TABLE Estoque_Movimentacoes (
 CREATE TABLE Vendas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     cliente_id INT,
-    status ENUM('Ativa','Cancelada') default 'Ativa',
+    status ENUM('Ativa','Cancelada', 'Pendente') default 'Pendente',
     data_venda DATETIME DEFAULT CURRENT_TIMESTAMP,
-    total DECIMAL(10, 2) NOT NULL,
+    total DECIMAL(10, 2) default 0,
     FOREIGN KEY (cliente_id) REFERENCES clientes(id)
 );
 CREATE TABLE Vendas_Itens (
