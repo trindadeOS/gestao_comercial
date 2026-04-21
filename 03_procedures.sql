@@ -1,4 +1,5 @@
 DELIMITER $$
+
 CREATE PROCEDURE EXEC_VENDA (
 IN p_cliente_id INT,
 IN p_produto_id INT,
@@ -6,30 +7,113 @@ IN p_quantidade INT,
 IN p_usuario_id INT
 )
 BEGIN 
+
 DECLARE v_estoque INT;
 DECLARE v_preco DECIMAL(12,2);
 DECLARE v_venda_id INT;
+
 START TRANSACTION;
-SET @usuario_id = p_usuario_id;
+
+
 SELECT estoque INTO v_estoque
 FROM Produtos
 WHERE id = p_produto_id;
-IF v_estoque >= p_quantidade THEN
+
+IF v_estoque < p_quantidade THEN
+    ROLLBACK;
+    SIGNAL SQLSTATE '45000' 
+    SET MESSAGE_TEXT = 'Estoque insuficiente';
+END IF;
+
+
+SELECT id INTO v_venda_id
+FROM vendas
+WHERE cliente_id = p_cliente_id
+AND status = 'Pendente'
+LIMIT 1;
+
+
+IF v_venda_id IS NULL THEN
+    INSERT INTO Vendas (cliente_id, status, total)
+    VALUES (p_cliente_id, 'Pendente', 0);
+
+    SET v_venda_id = LAST_INSERT_ID();
+END IF;
+
+
 SELECT preco INTO v_preco
 FROM Produtos
 WHERE id = p_produto_id;
-INSERT INTO Vendas (cliente_id,total) VALUES (p_cliente_id,v_preco * p_quantidade);
-SET v_venda_id = LAST_INSERT_ID();
-INSERT INTO Vendas_Itens (venda_id,produto_id,quantidade,preco_unitario) VALUES (v_venda_id,p_produto_id,p_quantidade,v_preco);
-INSERT INTO pagamentos (venda_id,valor) VALUES (v_venda_id,v_preco * p_quantidade);
-INSERT INTO Auditoria (usuario_id,tabela_afetada,id_registro,tipo_operacao,valor_antigo,valor_novo) VALUES (p_usuario_id,'Vendas',v_venda_id,'INSERT','NULL','NULL');
+
+
+INSERT INTO Vendas_Itens (venda_id, produto_id, quantidade, preco_unitario)
+VALUES (v_venda_id, p_produto_id, p_quantidade, v_preco);
+UPDATE vendas
+SET total = (
+    SELECT SUM(preco_unitario * quantidade)
+    FROM Vendas_Itens
+    WHERE venda_id = v_venda_id
+)
+WHERE id = v_venda_id;
 COMMIT;
-ELSE
-ROLLBACK;
-SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Não foi possivel registrar a venda.';
-END IF; 
+
 END$$
+
 DELIMITER ;
+
+
+DELIMITER $$
+CREATE PROCEDURE FINALIZAR_VENDA(
+p_venda_id INT,
+p_quantidade INT,
+p_cliente_id INT,
+p_usuario_id INT
+
+)
+BEGIN
+DECLARE v_status VARCHAR(20);
+DECLARE v_venda_id INT;
+DECLARE v_preco DECIMAL (10,2);
+DECLARE v_total_geral DECIMAL (10,2);
+START TRANSACTION;
+
+
+SELECT id
+INTO v_venda_id
+FROM vendas
+WHERE ID = p_venda_id;
+
+
+SELECT status
+INTO v_status
+FROM vendas
+WHERE id = v_venda_id;
+
+SELECT SUM(preco_unitario * quantidade) AS total_geral
+INTO v_total_geral
+FROM Vendas_Itens
+WHERE venda_id = v_venda_id;
+
+
+IF v_venda_id IS NOT NULL AND v_status = 'Pendente' THEN
+UPDATE vendas SET status = 'Ativa' WHERE id = v_venda_id;
+
+UPDATE Produtos
+JOIN Vendas_Itens on Produtos.id = Vendas_Itens.produto_id
+ SET produtos.estoque = produtos.estoque - Vendas_Itens.quantidade
+ WHERE Vendas_Itens.venda_id = v_venda_id;
+
+INSERT INTO Pagamentos (venda_id,valor) VALUES (v_venda_id,v_total_geral);
+INSERT INTO Auditoria (usuario_id,tabela_afetada,id_registro,tipo_operacao,valor_antigo,valor_novo) VALUES (p_usuario_id,'Vendas/Produtos',v_venda_id,'INSERT','Pendente','Ativa');
+COMMIT;
+ELSE 
+ROLLBACK;
+SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Não foi possivel finalizar a venda.';
+END IF;
+
+END$$
+
+
 
 DELIMITER $$
 CREATE PROCEDURE EXEC_DEVOLUCAO(
@@ -74,13 +158,13 @@ DECLARE v_venda_id INT;
 DECLARE v_usuario_id INT;
 DECLARE v_status VARCHAR (20);
 DECLARE v_quantidade INT;
--- Verificar se o id da venda existe
+
 START TRANSACTION;
 SELECT id
 INTO v_venda_id
 FROM vendas
 WHERE id = p_venda_id;
--- verificar se o status não é Cancelada
+
 SELECT status
 INTO v_status
 FROM Vendas
@@ -95,7 +179,5 @@ ROLLBACK;
 SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Não foi possivel realizar o cancelamento.';
 END IF;
 END$$
-
-DELIMITER ;
 
 
