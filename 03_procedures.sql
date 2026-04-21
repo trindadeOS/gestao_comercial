@@ -180,4 +180,140 @@ SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Não foi possivel realizar o cancela
 END IF;
 END$$
 
+DELIMITER $$
+
+CREATE PROCEDURE CRIAR_PRODUTO (
+p_usuario_id INT,
+p_fornecedor_id INT,
+p_nome_produto VARCHAR(20),
+p_categoria_id VARCHAR(20),
+p_preco DECIMAL (10,2),
+p_quantidade_produto INT,
+p_quantidade_minima INT
+)
+BEGIN
+-- verificar se usuario existe
+
+DECLARE v_usuario_id INT;
+DECLARE v_fornecedor_id INT;
+
+START TRANSACTION;
+
+SELECT COUNT(*) INTO v_usuario_id
+FROM Usuarios
+WHERE id = p_usuario_id;
+
+-- Verificar se fornecedor existe
+
+SELECT COUNT(*) INTO v_fornecedor_id
+FROM Fornecedores
+WHERE id = p_fornecedor_id;
+
+IF v_usuario_id > 0 AND v_fornecedor_id > 0 THEN
+INSERT INTO Produtos (nome,preco,categoria_id,fornecedor_id,estoque,estoque_minimo) 
+VALUES (p_nome_produto,p_preco,p_categoria_id,p_fornecedor_id,p_quantidade_produto,p_quantidade_minima);
+
+INSERT INTO Auditoria (usuario_id,tabela_afetada,id_registro,tipo_operacao,valor_antigo,valor_novo)
+VALUES (p_usuario_id,'Produtos',LAST_INSERT_ID(),'INSERT',NULL,p_quantidade_produto);
+
+COMMIT;
+ELSE
+ROLLBACK;
+SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Não foi possivel criar o produto. O Usuario ou fornecedor não existe.';
+END IF;
+END$$
+
+DELIMITER ;
+
+-- Criar Fornecedor
+
+DELIMITER $$
+
+CREATE PROCEDURE Aprovar_Fornecedor (
+p_cliente_id INT,
+p_usuario_id INT,
+p_nome_fornecedor VARCHAR(30),
+p_email_fornecedor VARCHAR(50),
+p_telefone_fornecedor VARCHAR (11)
+)
+BEGIN
+DECLARE v_cliente_existe INT;
+DECLARE v_usuario_existe INT;
+DECLARE v_tipo_usuario VARCHAR (20);
+
+START TRANSACTION;
+
+
+SELECT COUNT(*) INTO v_cliente_existe
+FROM clientes
+WHERE id = p_cliente_id;
+
+SELECT COUNT(*) INTO v_usuario_existe
+FROM Usuarios
+WHERE id = p_usuario_id;
+
+
+SELECT tipo
+INTO v_tipo_usuario
+FROM usuarios
+WHERE id = p_usuario_id;
+
+
+IF v_cliente_existe > 0 AND v_usuario_existe > 0 AND v_tipo_usuario = 'admin' THEN
+INSERT INTO  Fornecedores (nome,email,telefone)
+VALUES (p_nome_fornecedor,p_email_fornecedor,p_telefone_fornecedor);
+INSERT INTO Auditoria (usuario_id,tabela_afetada,id_registro,tipo_operacao,valor_antigo,valor_novo)
+VALUES (p_usuario_id,'Fornecedores',LAST_INSERT_ID(), 'INSERT',NULL,NULL);
+COMMIT;
+ELSE
+ROLLBACK;
+SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Não foi possivel aprovar o fornecedor. O cliente não existe e/ou usuario não existe ou usuario não é admin.';
+END IF;
+END$$
+
+delimiter ;
+
+-- CRIAR CATEGORIAS DE PRODUTOS
+
+DELIMITER $$
+
+CREATE PROCEDURE CRIAR_CATEGORIA (
+p_usuario_id INT,
+p_nome_categoria VARCHAR(20)
+)
+BEGIN
+DECLARE v_usuario_existe INT;
+DECLARE v_tipo_usuario VARCHAR(20);
+START TRANSACTION;
+
+-- VALIDAR SE O USUARIO É UM ADMIN OU QUAL TIPO DELE
+
+SELECT tipo
+INTO v_tipo_usuario
+FROM usuarios
+WHERE id = p_usuario_id;
+
+
+
+SELECT COUNT(*) 
+INTO v_usuario_existe
+FROM usuarios
+WHERE id = p_usuario_id;
+
+IF v_usuario_existe > 0 AND v_tipo_usuario = 'admin' THEN
+INSERT INTO Categorias (nome) 
+VALUES (p_nome_categoria);
+INSERT INTO Auditoria (usuario_id,tabela_afetada,id_registro,tipo_operacao,valor_antigo,valor_novo)
+VALUES (p_usuario_id,'Categorias',LAST_INSERT_ID(),'INSERT',NULL,p_nome_categoria);
+COMMIT;
+ELSE
+ROLLBACK;
+SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Não foi possivel criar a categoria. Usuario não existe;não é admin.';
+END IF;
+END$$
+
+
+
+
+
 
