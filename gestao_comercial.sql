@@ -117,3 +117,43 @@ SELECT
 FROM Produtos
 WHERE estoque < estoque_minimo;
 
+CREATE VIEW clientes_total AS
+SELECT clientes.id, clientes.nome, SUM(vendas.total) AS total_gasto
+FROM clientes
+JOIN vendas ON  vendas.cliente_id = clientes.id
+WHERE vendas.status = 'Ativa'
+GROUP BY clientes.id
+
+CREATE VIEW Ranking_Clientes AS
+SELECT clientes.id, clientes.nome, SUM(vendas.total) AS total_gasto
+FROM clientes
+JOIN Vendas ON vendas.cliente_id = clientes.id
+WHERE vendas.status = 'Ativa'
+GROUP BY clientes.id
+ORDER BY total_gasto DESC;
+
+CREATE VIEW Quantidade_Produtos_Vendidos AS
+SELECT
+produtos.id,
+produtos.nome,
+TOTAL_VENDIDO_PRODUTO(produtos.id) AS resumo_vendas
+FROM produtos;
+
+CREATE VIEW Ranking_Produtos AS
+SELECT produtos.id, produtos.nome, SUM(Vendas_Itens.quantidade) AS Total_Vendido
+FROM produtos
+JOIN Vendas_Itens ON Vendas_Itens.produto_id = produtos.id
+JOIN vendas ON vendas.id = Vendas_Itens.venda_id
+WHERE vendas.status = 'Ativa'
+GROUP BY produtos.id, produtos.nome
+ORDER BY Total_Vendido DESC;
+
+CREATE VIEW Faturamento_Mensal AS
+SELECT
+ DATE_FORMAT(data_venda, '%Y-%m') AS mes,
+ SUM(total) AS total_mes
+FROM vendas
+WHERE status = 'Ativa'
+GROUP BY mes;
+
+
