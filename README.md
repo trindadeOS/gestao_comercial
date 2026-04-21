@@ -1,140 +1,112 @@
 <div align="center">
 
-# 🧾 Gestão Comercial MySQL
+# 🧾 Gestão Comercial ERP
 
-**Sistema completo de gestão comercial com regras de negócio no banco de dados** — v1.0
+**Sistema completo de gestão comercial com banco de dados relacional avançado em MySQL**
 
-[![MySQL](https://img.shields.io/badge/MySQL-Advanced-blue?style=for-the-badge&logo=mysql&logoColor=white)]()
-[![Status](https://img.shields.io/badge/Project-Completed-success?style=for-the-badge)]()
-[![License](https://img.shields.io/badge/Academic-Project-lightgrey?style=for-the-badge)]()
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-blue?style=for-the-badge&logo=mysql&logoColor=white)]
+[![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow?style=for-the-badge)]
+[![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)]
 
-Sistema completo de banco de dados para gestão comercial com controle de clientes, fornecedores, produtos, vendas, pagamentos, estoque e devoluções — totalmente estruturado com **procedures, triggers, functions, views e transações SQL**.
-
----
-
-[📊 Estrutura](#estrutura) • [⚙️ Funcionalidades](#funcionalidades) • [🧠 Regras de Negócio](#regras-de-negócio) • [🗄️ Arquitetura](#arquitetura)
+Sistema de ERP backend para controle de vendas, estoque, clientes, fornecedores e relatórios inteligentes.
 
 </div>
 
 ---
 
-## 📊 Estrutura
+## 🚀 Sobre o projeto
 
-O sistema possui modelagem relacional completa com:
+O **Gestão Comercial ERP** é um sistema de banco de dados completo desenvolvido em MySQL, com foco em:
 
-- Clientes
-- Usuários (admin/vendedor)
-- Fornecedores
-- Categorias de produtos
-- Produtos
-- Vendas
-- Itens da venda
-- Pagamentos
-- Estoque
-- Devoluções
-- Auditoria de operações
+- Controle de vendas e fluxo de pedidos
+- Gestão automática de estoque
+- Relatórios gerenciais em tempo real
+- Auditoria de operações críticas
+- Regras de negócio encapsuladas em procedures e triggers
 
 ---
 
-## ⚙️ Funcionalidades
+## 🧠 Funcionalidades principais
 
-- ✔ Registro completo de vendas com múltiplos itens  
-- ✔ Controle automático de estoque  
-- ✔ Sistema de carrinho (venda pendente → ativa)  
-- ✔ Cancelamento com estorno de estoque  
-- ✔ Sistema de devolução com reentrada de produtos  
-- ✔ Auditoria completa de ações do sistema  
-- ✔ Classificação automática de clientes (Bronze / Prata / Ouro)  
-- ✔ Relatórios com Views SQL avançadas  
+### 📦 Produtos & Estoque
+- Cadastro de produtos com categoria e fornecedor
+- Controle automático de estoque
+- Movimentações de entrada e saída
 
----
+### 💰 Vendas
+- Criação de vendas com status (Pendente, Ativa, Cancelada)
+- Adição de itens por venda
+- Cálculo automático de total
 
-## 🧠 Regras de Negócio
-
-- Não é permitido vender sem estoque disponível  
-- Toda venda altera automaticamente o estoque  
-- Cancelamentos reconstroem o estoque anterior  
-- Toda alteração importante é registrada na auditoria  
-- Apenas usuários admin podem criar categorias e fornecedores  
-- Clientes são classificados por volume de compras  
-
----
-
-## 🗄️ Arquitetura do Banco
-
-O sistema foi desenvolvido utilizando recursos avançados do MySQL:
-
-### 🔹 Procedures
-- Execução de vendas completas
+### 🔁 Processos automáticos
 - Finalização de vendas
-- Criação de produtos e categorias
-- Aprovação de fornecedores
-- Processamento de devoluções
+- Cancelamento com reversão de estoque
+- Devoluções com validação de quantidade
 
-### 🔹 Functions
-- Cálculo de total de vendas
-- Classificação de clientes
-- Relatórios de produtos vendidos
+### 👥 Clientes & Fornecedores
+- Cadastro de clientes com classificação automática
+- Aprovação de fornecedores via permissão de admin
 
-### 🔹 Triggers
-- Atualização automática de estoque
-- Registro de movimentações
-- Auditoria de alterações
-
-### 🔹 Views
+### 📊 Relatórios (Views)
 - Ranking de clientes
 - Ranking de produtos
 - Faturamento mensal
-- Relatórios de reposição
-- Quantidade de produtos vendidos
+- Relatório de reposição de estoque
+- Total gasto por cliente
 
-### 🔹 Transações
-- Uso de `START TRANSACTION`, `COMMIT` e `ROLLBACK` para garantir integridade dos dados
-
----
-
-## 📈 Relatórios Disponíveis
-
-- Faturamento por mês  
-- Produtos mais vendidos  
-- Clientes com maior gasto  
-- Produtos com estoque baixo  
-- Histórico de vendas  
+### 🛡️ Auditoria
+- Registro de INSERT, UPDATE e DELETE
+- Rastreamento de alterações em produtos, vendas e estoque
 
 ---
 
-## 🔐 Auditoria
+## 🗂️ Estrutura do banco
 
-Todas as operações críticas são registradas com:
+### Principais tabelas:
 
-- Usuário responsável  
-- Tipo de operação (INSERT / UPDATE / DELETE)  
-- Tabela afetada  
-- Valores antigos e novos  
-- Data e hora  
-
----
-
-## 🚀 Objetivo do Projeto
-
-Simular um sistema real de gestão comercial, garantindo:
-
-- Integridade dos dados  
-- Automação de processos  
-- Segurança nas operações  
-- Rastreabilidade total  
-- Uso avançado de recursos do MySQL  
+- clientes
+- produtos
+- vendas
+- vendas_itens
+- fornecedores
+- categorias
+- usuarios
+- pagamentos
+- auditoria
+- devolucoes
+- estoque_movimentacoes
 
 ---
 
-## 👨‍💻 Autor
+## ⚙️ Lógica implementada
 
-Projeto acadêmico desenvolvido para estudo avançado de banco de dados relacional.
-Autores : Italo / Débora
+### 🔧 Procedures
+- `EXEC_VENDA` → cria vendas e adiciona itens
+- `FINALIZAR_VENDA` → finaliza venda e baixa estoque
+- `CANCELAR_VENDA` → cancela venda e restaura estoque
+- `EXEC_DEVOLUCAO` → devoluções de produtos
+- `CRIAR_PRODUTO` → validação de usuário e fornecedor
+- `CRIAR_CATEGORIA` → controle de acesso admin
+- `APROVAR_FORNECEDOR` → criação controlada
+
 ---
 
-<div align="center">
+### 🧮 Functions
+- `Calcular_Total` → soma total de uma venda
+- `Classificar_Cliente` → Bronze / Prata / Ouro
+- `Total_Vendido_Produto` → total vendido por produto
+- `Total_Gasto_Cliente` → total gasto por cliente
 
-Release 100%...
+---
 
-</div>
+### 📈 Views (Relatórios)
+- `Ranking_Clientes`
+- `Ranking_Produtos`
+- `Faturamento_Mensal`
+- `Clientes_Total`
+- `Relatorio_Reposicao`
+- `Quantidade_Produtos_Vendidos`
+
+---
+
+## 🔄 Fluxo do sistema
