@@ -5,7 +5,7 @@
 **Sistema completo de gestão comercial com banco de dados relacional avançado em MySQL**
 
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-blue?style=for-the-badge&logo=mysql&logoColor=white)]
-[![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow?style=for-the-badge)]
+[![Status](https://img.shields.io/badge/status-finalizado-yellow?style=for-the-badge)]
 [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)]
 
 Sistema de ERP backend para controle de vendas, estoque, clientes, fornecedores e relatórios inteligentes.
