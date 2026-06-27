@@ -109,4 +109,4 @@ O **Gestão Comercial ERP** é um sistema de banco de dados completo desenvolvid
 
 ---
 
-## Desenvolvido Por : Trindade e Débora.
+## Desenvolvido Por : Trindade.
